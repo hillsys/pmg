@@ -1,0 +1,7 @@
+[package]
+name = "pmg"
+version = "0.1.0"
+authors = ["Paul Hill <paulghill@msn.com>"]
+
+[dependencies]
+rand = "0.3.15"
