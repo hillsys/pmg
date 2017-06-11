@@ -1,6 +1,3 @@
-//From a c# programing background, snake case was frowned upon.
-#![allow(non_snake_case)]
-
 extern crate rand;
 use rand::Rng;
 use std::env;
@@ -10,85 +7,85 @@ use std::env;
 //Build help file
 //Change to proper formatting based on Rust rules
 
-struct MACAddress {
-    MAC: Vec<String>,
-    Case: bool,
-    Separator: String,
-    Range: usize,
-    IsUnique: bool,
+struct MachineAddress {
+    mac: Vec<String>,
+    case: bool,
+    separator: String,
+    range: usize,
+    is_unique: bool,
 }
 
-impl MACAddress {
-    fn PrintOctets(&self) {
-        let octetRange = if self.IsUnique == true {
+impl MachineAddress {
+    fn print_octets(&self) {
+        let octet_range = if self.is_unique == true {
             6
         } else {
-            6 - self.Range
+            6 - self.range
         };
 
-        for i in 0..octetRange {
-            if self.Case == true {
-                print!("{}",self.MAC[i].to_lowercase());
+        for i in 0..octet_range {
+            if self.case == true {
+                print!("{}",self.mac[i].to_lowercase());
             } else {
-                print!("{}",self.MAC[i]);
+                print!("{}",self.mac[i]);
             }
-            if i < octetRange - 1 {
-                print!("{}",self.Separator);
+            if i < octet_range - 1 {
+                print!("{}",self.separator);
             }
         }
     }
 
-    fn PrintAssignableOctets(&self, isBeginning: bool) {
-        &self.PrintOctets();
-        print!("{}", self.Separator);
+    fn print_assignable_octets(&self, is_beginning: bool) {
+        &self.print_octets();
+        print!("{}", self.separator);
 
-        for i in 0..self.Range{
-            if isBeginning == true {
+        for i in 0..self.range{
+            if is_beginning == true {
                 print!("00");
             } else {
-                if self.Case == true {
+                if self.case == true {
                     print!("ff");
                 } else {
                     print!("FF");
                 }
             }
             
-            if i < self.Range -1 {
-                print!("{}", self.Separator);
+            if i < self.range -1 {
+                print!("{}", self.separator);
             }
         }
     }
 
-    fn Print(&self) {
-        if self.IsUnique == false {
+    fn print(&self) {
+        if self.is_unique == false {
             print!("Private MAC Prefix:    ");
         } else{
             print!("Private MAC Address:   ");
         }
         
-        &self.PrintOctets();
+        &self.print_octets();
 
-        if self.IsUnique == false {
+        if self.is_unique == false {
             println!();
-            println!("Assignable Addresses:  {}", (256 as i32).pow(self.Range as u32));
+            println!("Assignable Addresses:  {}", (256 as i32).pow(self.range as u32));
             print!("Assigned Addresses:    ");
-            self.PrintAssignableOctets(true);
+            self.print_assignable_octets(true);
             print!(" - ");
-            self.PrintAssignableOctets(false);
+            self.print_assignable_octets(false);
         }
     }
 }
 
 struct Argument {
-    POSIX: String,
-    GNU: String,
+    posix: String,
+    gnu: String,
 }
 
 impl Argument {
-    fn IsUsed(&self, args: &Vec<String>) -> bool {
-        let output = if args.contains(&self.GNU) {
+    fn is_used(&self, args: &Vec<String>) -> bool {
+        let output = if args.contains(&self.gnu) {
             true
-        } else if args.contains(&self.POSIX) {
+        } else if args.contains(&self.posix) {
             true
         } else {
             false
@@ -99,18 +96,18 @@ impl Argument {
 }
 
 struct ArgumentWithValue <T> {
-    Arg: Argument,
-    AcceptedValues: Vec<String>,
-    ReturnValues: Vec<T>,
-    DefaultValue: T,
+    arg: Argument,
+    accepted_values: Vec<String>,
+    return_values: Vec<T>,
+    default_value: T,
 }
 
 impl <T: PartialEq> ArgumentWithValue<T> {
-    fn GetIndex(&self, args: &&Vec<String>) -> usize {
-        let index = if args.contains(&self.Arg.GNU) {
-            args.iter().position(|value| value == &self.Arg.GNU).unwrap()
-        } else if args.contains(&self.Arg.POSIX) {
-            args.iter().position(|value| value == &self.Arg.POSIX).unwrap()
+    fn get_index(&self, args: &&Vec<String>) -> usize {
+        let index = if args.contains(&self.arg.gnu) {
+            args.iter().position(|value| value == &self.arg.gnu).unwrap()
+        } else if args.contains(&self.arg.posix) {
+            args.iter().position(|value| value == &self.arg.posix).unwrap()
         } else {
             0
         };
@@ -118,17 +115,17 @@ impl <T: PartialEq> ArgumentWithValue<T> {
         index
     }
 
-    fn GetReturnValue(&self, args: &Vec<String>) -> &T {
-        let index = self.GetIndex(&args);
+    fn get_return_value(&self, args: &Vec<String>) -> &T {
+        let index = self.get_index(&args);
         let output = if args.len() >= index +2 {
-            if self.AcceptedValues.contains(&args[index + 2]) {
-                let returnIndex = self.AcceptedValues.iter().position(|value| value == &args[index + 1]).unwrap();
-                &self.ReturnValues[returnIndex]
+            if self.accepted_values.contains(&args[index + 2]) {
+                let return_index = self.accepted_values.iter().position(|value| value == &args[index + 1]).unwrap();
+                &self.return_values[return_index]
             } else {
-                &self.DefaultValue
+                &self.default_value
             }
         } else {
-            &self.DefaultValue
+            &self.default_value
         };
 
         output
@@ -139,67 +136,67 @@ fn main() {
     //Get arguments for the program
     let args: Vec<String> = env::args().collect();
 
-    let rangeArgument = ArgumentWithValue::<usize> {
-        Arg: Argument {
-            POSIX: "-r".to_string(),
-            GNU: "--range".to_string(),
+    let range_argument = ArgumentWithValue::<usize> {
+        arg: Argument {
+            posix: "-r".to_string(),
+            gnu: "--range".to_string(),
         },
-        AcceptedValues: vec!["1".to_string(), "2".to_string(), "3".to_string()],
-        ReturnValues: vec![1, 2, 3],
-        DefaultValue: 1
+        accepted_values: vec!["1".to_string(), "2".to_string(), "3".to_string()],
+        return_values: vec![1, 2, 3],
+        default_value: 1
     };
-    let caseArgument = ArgumentWithValue::<bool> {
-        Arg: Argument {
-            POSIX: "-c".to_string(),
-            GNU: "--case".to_string(),
+    let case_argument = ArgumentWithValue::<bool> {
+        arg: Argument {
+            posix: "-c".to_string(),
+            gnu: "--case".to_string(),
         },
-        AcceptedValues: vec!["u".to_string(), "l".to_string()],
-        ReturnValues: vec![false, true],
-        DefaultValue: true
+        accepted_values: vec!["u".to_string(), "l".to_string()],
+        return_values: vec![false, true],
+        default_value: true
     };
-    let separatorArgument = ArgumentWithValue::<String> {
-        Arg: Argument {
-            POSIX: "-s".to_string(),
-            GNU: "--separator".to_string(),
+    let separator_argument = ArgumentWithValue::<String> {
+        arg: Argument {
+            posix: "-s".to_string(),
+            gnu: "--separator".to_string(),
         },
-        AcceptedValues: vec![":".to_string(), "-".to_string(), ".".to_string()],
-        ReturnValues: vec![":".to_string(), "-".to_string(), ".".to_string() ],
-        DefaultValue: "".to_string()
+        accepted_values: vec![":".to_string(), "-".to_string(), ".".to_string()],
+        return_values: vec![":".to_string(), "-".to_string(), ".".to_string() ],
+        default_value: "".to_string()
     };
-    let uniqueArgument = Argument {
-        POSIX: "-u".to_string(),
-        GNU: "--unique".to_string(),
+    let unique_argument = Argument {
+        posix: "-u".to_string(),
+        gnu: "--unique".to_string(),
     };
 
-    let macAddress = MACAddress {
-        MAC: vec![FirstOctet(),GenerateOctet(),GenerateOctet(),GenerateOctet(),GenerateOctet(),GenerateOctet()],
-        Case: *caseArgument.GetReturnValue(&args),
-        Separator: separatorArgument.GetReturnValue(&args).to_string(),
-        Range: *rangeArgument.GetReturnValue(&args),
-        IsUnique: uniqueArgument.IsUsed(&args)
+    let address = MachineAddress {
+        mac: vec![generate_first_octet(),generate_octet(),generate_octet(),generate_octet(),generate_octet(),generate_octet()],
+        case: *case_argument.get_return_value(&args),
+        separator: separator_argument.get_return_value(&args).to_string(),
+        range: *range_argument.get_return_value(&args),
+        is_unique: unique_argument.is_used(&args)
     };
 
-    macAddress.Print();
+    address.print();
 }
 
 //Returns a random hexadecimal number
-fn GenerateHex() -> String {
+fn generate_hex() -> String {
     //Vector containing the hexadecimal digits
-    let hexValues = vec!['1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
+    let hex_values = vec!['1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
     let index = rand::thread_rng().gen_range(0,15);
-    hexValues[index].to_string()
+    hex_values[index].to_string()
 }
 
 //Returns the first octet of a MAC address, randomizing the private address hex variable
 //See https://en.wikipedia.org/wiki/MAC_address for details
-fn FirstOctet() -> String {
+fn generate_first_octet() -> String {
     //Vector containing the private hexadecimal digits
-    let hexReturn = vec!['2', '6', 'A', 'E'];
+    let hex_values = vec!['2', '6', 'A', 'E'];
     let index = rand::thread_rng().gen_range(0,3);
-    GenerateHex() + &hexReturn[index].to_string()
+    generate_hex() + &hex_values[index].to_string()
 }
 
-fn GenerateOctet() -> String {
-    GenerateHex() + &GenerateHex()
+fn generate_octet() -> String {
+    generate_hex() + &generate_hex()
 }
 
