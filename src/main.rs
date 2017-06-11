@@ -3,9 +3,7 @@ use rand::Rng;
 use std::env;
 
 //ToDo: 
-//Work on building this in Ubuntu bash somehow so we can have two binaries
-//Build help file
-//Change to proper formatting based on Rust rules
+//Work on building this in Ubuntu under different architectures
 
 struct MachineAddress {
     mac: Vec<String>,
@@ -17,14 +15,14 @@ struct MachineAddress {
 
 impl MachineAddress {
     fn print_octets(&self) {
-        let octet_range = if self.is_unique == true {
+        let octet_range = if self.is_unique {
             6
         } else {
             6 - self.range
         };
 
         for i in 0..octet_range {
-            if self.case == true {
+            if self.case {
                 print!("{}",self.mac[i].to_lowercase());
             } else {
                 print!("{}",self.mac[i]);
@@ -40,10 +38,10 @@ impl MachineAddress {
         print!("{}", self.separator);
 
         for i in 0..self.range{
-            if is_beginning == true {
+            if is_beginning {
                 print!("00");
             } else {
-                if self.case == true {
+                if self.case {
                     print!("ff");
                 } else {
                     print!("FF");
@@ -57,7 +55,7 @@ impl MachineAddress {
     }
 
     fn print(&self) {
-        if self.is_unique == false {
+        if !self.is_unique {
             print!("Private MAC Prefix:    ");
         } else{
             print!("Private MAC Address:   ");
@@ -65,7 +63,7 @@ impl MachineAddress {
         
         &self.print_octets();
 
-        if self.is_unique == false {
+        if !self.is_unique {
             println!();
             println!("Assignable Addresses:  {}", (256 as i32).pow(self.range as u32));
             print!("Assigned Addresses:    ");
@@ -117,10 +115,14 @@ impl <T: PartialEq> ArgumentWithValue<T> {
 
     fn get_return_value(&self, args: &Vec<String>) -> &T {
         let index = self.get_index(&args);
-        let output = if args.len() >= index +2 {
-            if self.accepted_values.contains(&args[index + 2]) {
-                let return_index = self.accepted_values.iter().position(|value| value == &args[index + 1]).unwrap();
-                &self.return_values[return_index]
+        let output = if index > 0 {
+            if args.len() >= index + 1 {
+                if self.accepted_values.contains(&args[index + 1]) {
+                    let return_index = self.accepted_values.iter().position(|value| value == &args[index + 1]).unwrap();
+                    &self.return_values[return_index]
+                } else {
+                    &self.default_value
+                }
             } else {
                 &self.default_value
             }
@@ -150,7 +152,7 @@ fn main() {
             posix: "-c".to_string(),
             gnu: "--case".to_string(),
         },
-        accepted_values: vec!["u".to_string(), "l".to_string()],
+        accepted_values: vec!["u".to_string(), "l".to_string(), "lower".to_string(), "upper".to_string()],
         return_values: vec![false, true],
         default_value: true
     };
@@ -160,12 +162,16 @@ fn main() {
             gnu: "--separator".to_string(),
         },
         accepted_values: vec![":".to_string(), "-".to_string(), ".".to_string()],
-        return_values: vec![":".to_string(), "-".to_string(), ".".to_string() ],
+        return_values: vec![':'.to_string(), '-'.to_string(), '.'.to_string() ],
         default_value: "".to_string()
     };
     let unique_argument = Argument {
         posix: "-u".to_string(),
         gnu: "--unique".to_string(),
+    };
+    let help_argument = Argument {
+        posix: "-h".to_string(),
+        gnu: "--help".to_string(),
     };
 
     let address = MachineAddress {
@@ -176,7 +182,11 @@ fn main() {
         is_unique: unique_argument.is_used(&args)
     };
 
-    address.print();
+    if help_argument.is_used(&args) || args.len() == 1 {
+        println!("{}", generate_help())
+    } else {
+        address.print();
+    }
 }
 
 //Returns a random hexadecimal number
@@ -198,5 +208,61 @@ fn generate_first_octet() -> String {
 
 fn generate_octet() -> String {
     generate_hex() + &generate_hex()
+}
+
+fn generate_help() -> String {
+    let output = "Help file for pmg (Private MAC Generator), a random private MAC generator.
+
+NAME
+    pmg
+
+SYNTAX POSIX
+    pmg [-h] [-u] [[-r] <integer>] [[-s] <string>] [[-c] <string>]
+
+SYNTAX GNU
+    pmg [--help] [--unique] [[--range] <integer>] [[--separator] <string>] [[--case] <string>]
+	
+USAGE
+    POSIX   GNU        NOTES
+    -h      --help     Displays help message.
+                       Overrides:  All
+	
+    -u      --unique   Generates a single MAC address.  
+                       Overrides: -r/--range.
+						
+    -r      --range    Generates a MAC prefix for a range of private addresses.
+                       Accepted Values:  1 2 3
+                       Defaults: 1
+                       Notes:  Refers to how many octets to use to generate your
+                                private MAC prefix.
+                                1 (1 octet)  =      255 assignable addresses
+                                2 (2 octets) =    65536 assignable addresses
+                                3 (3 octets) = 16777216 assignable addresses
+								
+    -s      --separator The separator used for the MAC address.
+                        Accepted Values:  : - .
+                        Defaults:  No separator
+						
+    -c      --case      The case the hexadecimal letters are shown in.
+                        Accepted Values:  l u lower upper
+                        Defaults:  l
+
+EXAMPLES
+    pmg -u                  Provides a single MAC address: xxxxxxxxxxxx
+    pmg -r 2 -c u -s :      Provides a MAC prefix of:  XX:XX:XX:XX
+    pmg -s -                Provides a MAC prefix of:  xx-xx-xx-xx-xx
+						
+						
+REMARKS
+    Providing incorrect values for arguments will result in use of default value for that remark.
+    Example:  pmg -r 5 [Result will use default for -r which is 1]	
+	
+CONTACT INFORMATION
+    Paul Hill
+    paulghill@msn.com
+	
+Copyright 2017";
+
+    output.to_string()
 }
 
