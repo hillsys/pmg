@@ -2,9 +2,6 @@ extern crate rand;
 use rand::Rng;
 use std::env;
 
-//ToDo: 
-//Work on building this in Ubuntu under different architectures
-
 struct MachineAddress {
     mac: Vec<String>,
     case: bool,
