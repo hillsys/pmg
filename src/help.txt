@@ -41,7 +41,7 @@ EXAMPLES
 						
 						
 REMARKS
-    Providing incorrect values for arguments will result in use of default value for that remark.
+    Providing incorrect values for arguments will result in use of default value for that argument.
     Example:  pmg -r 5 [Result will use default for -r which is 1]	
 	
 CONTACT INFORMATION
