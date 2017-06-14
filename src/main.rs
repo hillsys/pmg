@@ -1,31 +1,6 @@
-//ToDo:  Improve arguments and implement a partial search for GNU syntax
-//
-//Go ahead and build a mutable loop for generating MAC address since we already had to 
-//create mutable variables to process arguments.
-//
-//Break the parse_arguments function into separate manageable parts.
-//
-//Look at renaming all the argument functions and variables to make it more clear if it is needed
-//
-//Try to consolidate argument functions with new parsing of arguments.
-//
-//Program is stable at the moment.
-
-
 extern crate rand;
 use rand::Rng;
 use std::env;
-
-struct ParsedArgument {
-    arg: String,
-    value: String,
-}
-
-impl PartialEq for ParsedArgument {
-    fn eq(&self, other: &ParsedArgument) -> bool {
-        self.arg == other.arg
-    }
-}
 
 struct MachineAddress {
     //The MAC address or prefix that will be printed
@@ -40,7 +15,6 @@ struct MachineAddress {
     separator: String,
 }
 
-//Functions implementing MachineAddress
 impl MachineAddress {
     //Prints the octets that have been assigned to MachineAddress.mac
     fn print_octets(&self) {
@@ -144,36 +118,97 @@ impl MachineAddress {
     }
 }
 
-//https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
+//See fn parse_arguments() and impl Argument fn create_posix_search(&self)
+//fn parse_arguments() fills a vector of ParsedArgument based on env::args().collect()
+//impl Argument fn create_posix_search(&self) creates a ParsedArgument for searching a ParsedArgument vector
+struct ParsedArgument {
+    //The argument found when parsing env::args().collect()
+    arg: String,
+    //The value of the argument if it has one.  Defaults to empty string.
+    value: String,
+}
+
+//To have the ability to search a vector of ParsedArguments against another ParsedArgument struct
+//the ParsedArgument struct has to implement PartialEq trait
+impl PartialEq for ParsedArgument {
+    fn eq(&self, other: &ParsedArgument) -> bool {
+        self.arg == other.arg
+    }
+}
+
+//This is the return struct for impl Argument fn check_args(&self, args: &Vec<ParsedArgument>) 
+//It is used to determine if struct Argument has been called by user, and returns the index
+//of the ParsedArgument vector created by fn parse_arguments()
+struct ArgumentCheck {
+    is_used: bool,
+    parse_index: usize,
+}
+
+//Defines a POSIX and GNU argument.  This can be expanded on, but proper searches would need
+//to be created in impl Argument fn check_args(&self, args: &Vec<ParsedArgument>) as well
+// as fn parse_arguments()
 struct Argument {
-    //POSIX syntax utilizes a single dash or hyphen - utilizing a single alphanumeric
+    //POSIX syntax utilizes a single dash or hyphen - utilizing a single alphanumeric.
+    //Do not enter the dash "-" before the argument.
     posix: String,
     //GNU syntax utilizes double dashes or hyphens -- utilizing full words
+    //Do not enter the double dash "--" before the argument.
     gnu: String,
 }
 
 impl Argument {
-    fn is_used(&self, args: &Vec<ParsedArgument>) -> bool {
-        let output = if args.contains(&self.parsed_gnu()) {
-            true
-        } else if args.contains(&self.parsed_posix()) {
-            true
+    //Checks to see if ParsedArgument vector contains a value for this argument
+    fn check_args(&self, args: &Vec<ParsedArgument>) -> ArgumentCheck {
+        //The search mechanism for POSIX and GNU are very different.
+        //For GNU we must initialize a default index.  The is_gnu flag is used
+        //to bypass POSIX searching.  The posix_search variable is utilized to 
+        //prevent self.create_posix_search() from being called more than one.
+        let mut gnu_index: usize = 0;
+        let mut is_gnu = false;
+        let posix_search = self.create_posix_search();
+
+        //Loop ParsedArgument vector
+        for i in 0..args.len(){
+            //See if any ParsedArgument.arg is partial/full match to current
+            //GNU argument.  Note that it will match a single character up to full word.
+            //It is important that no two GNU arguments begin with the same letter.
+            //Otherwise, we would need to implement a minimum length to qualify a GNU
+            //argument under fn parse_arguments().  Example would be two arguments named
+            //no-return and no-color.  If the user typed --no instead of full syntax or at least to the 
+            //fourth character no-r or no-c, both arguments would be qualified.
+            if self.gnu.starts_with(args[i].arg.as_str()) {
+                gnu_index = i;
+                is_gnu = true;
+            }
+        }
+
+        //If this is a GNU argument, pass the values
+        let output = if is_gnu {
+            ArgumentCheck {
+                is_used: true,
+                parse_index: gnu_index,
+            }
+        //Otherwise do a POSIX search for the values
+        } else if args.contains(&posix_search) {
+            ArgumentCheck {
+                is_used: true,
+                parse_index: args.iter().position(|value| value == &posix_search).unwrap(),
+            }
+        //If POSIX and GNU searches failed, return that the argument is not used with zero index.
         } else {
-            false
+            ArgumentCheck {
+                is_used: false,
+                parse_index: 0,
+            }
         };
 
         output
     }
 
-    fn parsed_gnu(&self) -> ParsedArgument{
+    //Creates a ParsedArgument based on self posix value for searching
+    //against the ParsedArgument vector created by fn parse_arguments()
+    fn create_posix_search(&self) -> ParsedArgument{
         ParsedArgument {
-            arg: self.gnu.to_string(),
-            value: "".to_string(),
-        }
-    }
-
-    fn parsed_posix(&self) -> ParsedArgument{
-        ParsedArgument{
             arg: self.posix.to_string(),
             value: "".to_string(),
         }
@@ -181,58 +216,65 @@ impl Argument {
 }
 
 struct ArgumentWithValue <T> {
+    //Defines the POSIX and GNU arguments
     arg: Argument,
+    //Vector containing all the accepted values expected to be typed in by user
     accepted_values: Vec<String>,
+    //The return value based on the accepted values.  Both accepted and return values should
+    //contain the same number of elements.  The accepted values are string values as they are used 
+    //to verify what was entered by the user, the return values do not have to be the same value, just
+    //what is expected to be returned back to the program when the user enters an accepted value.
+    //Example:
+    //    accepted_values: vec!["1".to_string(), "2".to_string(), "3".to_string()]
+    //    return_values: vec![256, 65536, 16777216]
+    //    User selects this argument with a value of "1".  The software will then find the index of "1"
+    //    from accepted_values and use that index to return 256 since both "1" and 256 have the same index value.
     return_values: Vec<T>,
+    //The default value if the argument is not used, or if someone entered a wrong value.  
     default_value: T,
 }
 
 impl <T: PartialEq> ArgumentWithValue<T> {
-    fn get_index(&self, args: &Vec<ParsedArgument>) -> usize {
-        let index = if args.contains(&self.arg.parsed_gnu()) {
-            args.iter().position(|value| value == &self.arg.parsed_gnu()).unwrap()
-        } else if args.contains(&self.arg.parsed_posix()) {
-            args.iter().position(|value| value == &self.arg.parsed_posix()).unwrap()
-        } else {
-            0
-        };
-
-        index
-    }
-
+    //Returns the value selected by the user or the default value if the value the user
+    //entered is not valid or is missing
     fn get_return_value(&self, args: &Vec<ParsedArgument>) -> &T {
-        let index = self.get_index(&args);
-        let output = if index > 0 {
-            if args.len() >= index + 1 {
-                if self.accepted_values.contains(&args[index].value) {
-                    let return_index = self.accepted_values.iter().position(|value| value == &args[index].value).unwrap();
-                    &self.return_values[return_index]
-                } else {
-                    &self.default_value
-                }
+        //check_args provides the index to find the value in the ParsedArgument vector
+        let parse_result = &self.arg.check_args(args);
+        
+        //If what the user inputted is in the accepted values, get the index and return
+        //the value from return_values
+        let output = if self.accepted_values.contains(&args[parse_result.parse_index].value) {
+                let return_index = self.accepted_values.iter().position(|value| value == &args[parse_result.parse_index].value).unwrap();
+                &self.return_values[return_index]
+            //Otherwise return default value.  If the user entered a wrong value display warning if the argument was passed.
             } else {
+                if parse_result.is_used {
+                    println!();
+                    print!("Incorrect parameter usage for POSIX -{}", self.arg.posix);
+                    print!(" or GNU --{}.", self.arg.gnu);
+                    println!();
+                    println!("Acceptable values are:  {:?}.", self.accepted_values);
+                    println!("Default value will be used.  Type 'pmg -h' for more information.");
+                    println!();
+                };
+
                 &self.default_value
-            }
-        } else {
-            &self.default_value
-        };
+            };
 
         output
     }
 }
 
-//The entry point of the application.  From here is where all code is executed.
+//The entry point of the application.
 fn main() {
-    //Get arguments for the program.  Note that Rust will always return 1 argument
-    //that contains the path of the program.
-    let args: Vec<String> = env::args().collect();
-    let parsed_args = parse_arguments(&args);
+    //Get arguments for the program and parse them into usable struct
+    let parsed_args = parse_arguments();
     
     //Notifies the program to bypass printing the MAC address and show help menu.
     let show_help = Argument {
             posix: "h".to_string(),
             gnu: "help".to_string(),
-        }.is_used(&parsed_args);
+        }.check_args(&parsed_args).is_used;
 
     //Print help menu if argument was used, otherwise print the MAC address
     if show_help {
@@ -256,7 +298,7 @@ fn main() {
         let unique = Argument {
                 posix: "u".to_string(),
                 gnu: "unique".to_string(),
-            }.is_used(&parsed_args);
+            }.check_args(&parsed_args).is_used;
             
         //Handles the printing of the MAC address
         MachineAddress {
@@ -267,7 +309,7 @@ fn main() {
             //Provide the count of the arguments.  This is so the program knows
             //if any arguments were passed and if it needs to provide a specific message
             //when no arguments have been assigned.
-            arg_count: args.len(),
+            arg_count: parsed_args.len(),
 
             //Provide what case the letters are to be displayed in.
             //Default is lower case, which is true.
@@ -289,7 +331,7 @@ fn main() {
             no_separator: Argument {
                 posix: "n".to_string(),
                 gnu: "noSeparator".to_string(),
-            }.is_used(&parsed_args),
+            }.check_args(&parsed_args).is_used,
 
             //As noted above, this originally defaulted to empty string.  But to remove
             //the need of a vector string for return values, the empty string had to be removed
@@ -365,48 +407,80 @@ Copyright 2017";
     output.to_string()
 }
 
-fn parse_arguments(args:  &Vec<String>) -> Vec<ParsedArgument> {
+//Parses the env::args().collect() into a format to search against for the struct Argument.
+fn parse_arguments() -> Vec<ParsedArgument> {
+    //Get the arguments used
+    let args: Vec<String> = env::args().collect();
+
+    //The first argument is always the path.  Setup a mutable vector to push
+    //other arguments to.
     let mut output = vec![ParsedArgument{
             arg: "path".to_string(),
             value: args[0].to_string(),
         }];
 
-    if args.len() > 0 {
+    //If there is more than 1 argument
+    if args.len() > 1 {
+        //Loop through all the arguments.
         for i in 0..args.len() {
+            //This variable is used to see if we need to break POSIX arguments apart.
             let mut is_posix = false;
+            //Set the current argument
             let mut current_arg = args[i].to_string();
+            //Look ahead to next argument and capture it incase it is a value.
             let next_arg = if args.len() > i + 1 {
                 args[i + 1].to_string()
+            //If at end of arguments, return empty string.
             } else {
                 "".to_string()
             };
 
+            //We must first search for GNU arguments.  The reasoning is both GNU and POSIX
+            //being with "-".  If we begin with POSIX searches, GNU arguments would also be
+            //qualified, but would not match any Argument struct posix variable.
             let mut output_arg = if current_arg.starts_with("--") {
+                //If it is a GNU argument, remove the dashes
                 current_arg.split_off(2)
+            //If not GNU check to see if it is POSIX
             } else if current_arg.starts_with("-") {
                 is_posix = true;
+                //If it is POSIX remove the dash
                 current_arg.split_off(1)
+            //This current_arg is not an arg at all.  The double dash is just a place holder for filtering.
             } else {
                 "--".to_string()
             };
 
+            //If the output_arg has a double dash, ignore this process.  It isn't a valid argument.
             if output_arg != "--" {
+                //If not POSIX or if it is POSIX and has a length of 1
+                //Look at next argument and see if it an actually argument or a value
                 if !is_posix || output_arg.len() == 1 {
                     if args.len() >= i + 1 {
+                        //If it doesn't begin with a dash (qualifies both GNU and POSIX arguments) it must a value
                         let arg_value = if !next_arg.starts_with("-") {
                             next_arg
+                        //Otherwise this argument was not supplied a value
                         } else {
                             "".to_string()
                         };
 
+                        //Add the argument and value to the vector
                         output.push(ParsedArgument{
                             arg: output_arg,
                             value: arg_value,
                         });
                     }
+                //It is POSIX arguments chained together.  For this program, '-un' would be an example
+                //which would represent generate a unique MAC address without separators
                 } else {
+                    //We are getting the length of the argument string
                     let range = output_arg.len();
+                    //Cycle through the range of the string
                     for _ in 0..range {
+                        //Add the argument to the vector by removing one character from the output_arg string
+                        //These will not have values so default value to empty string.  POSIX arguments with values
+                        //must be used individually and not in a combined manner.
                         output.push(ParsedArgument{
                             arg: output_arg.remove(0).to_string(),
                             value: "".to_string(),
@@ -446,27 +520,22 @@ fn generate_mac(range: usize, unique: bool) -> Vec<String> {
     //See https://en.wikipedia.org/wiki/MAC_address for details
     let first_octet = generate_hexadecimal() + &hex_values[index].to_string();
 
-    //Define the output and add octets to vector based on requested size or if it is a unique address.
-    //This could be defined as a loop but it would require about the same amount of code and
-    //would need a mutable variable.  Originally, the struct MachineAddress was just assigned the full
-    //6 octets.  While this was not wrong as we are dealing with a trivial amount of information,
-    //it was a poor design in that we are generating more information than is requested.  We should
-    //only generate data that will be used as general rule of thumb to prevent more work than is
-    //necessary on a longer function or program, especially if the tasks are constantly running in 
-    //the background.
-    let output = if range == 3 && !unique {
-        //Allow for 3 assignable octets (generate 3 octets)
-        vec![first_octet, generate_octet(), generate_octet()]
-    } else if range == 2 && !unique {
-        //Allow for 2 assignable octets (generate 4 octets)
-        vec![first_octet, generate_octet(), generate_octet(), generate_octet()]
-    } else if range == 1 && !unique {
-        //Allow for 1 assignable octet (generate 5 octets)
-        vec![first_octet, generate_octet(), generate_octet(), generate_octet(), generate_octet()]      
+    //Assign the first octet to the vector
+    let mut output = vec![first_octet];
+
+    //Generate the index range for remaining 5 octets
+    //If unique generate all 5 octets
+    let index = if unique {
+        5
+    //Otherwise only generate the octets as requested
     } else {
-        //Generate a unique MAC address
-        vec![first_octet, generate_octet(), generate_octet(), generate_octet(), generate_octet(), generate_octet()]  
+        5 - range
     };
+
+    //Insert the octets into the vector
+    for _ in 0..index {
+        output.push(generate_octet());
+    }
     
     output
 }
