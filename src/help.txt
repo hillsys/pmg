@@ -1,4 +1,4 @@
-Help file for pmg (Private MAC Generator), a random private MAC generator.
+Help file for pmg (Private MAC Generator), a random locally administered MAC generator.
 
 NAME
     pmg

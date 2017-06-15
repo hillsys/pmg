@@ -351,7 +351,7 @@ fn main() {
 }
 
 fn print_help() -> String {
-    let output = "Help file for pmg (Private MAC Generator), a random private MAC generator.
+    let output = "Help file for pmg (Private MAC Generator), a random locally administered MAC generator.
 
 NAME
     pmg
