@@ -132,9 +132,9 @@ impl MachineAddress {
     }
 }
 
-//See fn parse_arguments() and impl Argument fn create_posix_search(&self)
-//fn parse_arguments() fills a vector of ParsedArgument based on env::args().collect()
-//impl Argument fn create_posix_search(&self) creates a ParsedArgument for searching a ParsedArgument vector
+//See parse_arguments() and Argument.create_posix_search(&self)
+//parse_arguments() fills a vector of ParsedArguments based on env::args().collect()
+//Argument.create_posix_search(&self) creates a ParsedArgument for searching the ParsedArgument vector
 struct ParsedArgument {
     //The argument found when parsing env::args().collect()
     arg: String,
@@ -150,17 +150,17 @@ impl PartialEq for ParsedArgument {
     }
 }
 
-//This is the return struct for impl Argument fn check_args(&self, args: &Vec<ParsedArgument>) 
+//This is the return struct for Argument.check_args(&self, args: &Vec<ParsedArgument>) 
 //It is used to determine if struct Argument has been called by user, and returns the index
-//of the ParsedArgument vector created by fn parse_arguments()
+//of the ParsedArgument vector created by parse_arguments()
 struct ArgumentCheck {
     is_used: bool,
     parse_index: usize,
 }
 
 //Defines a POSIX and GNU argument.  This can be expanded on, but proper searches would need
-//to be created in impl Argument fn check_args(&self, args: &Vec<ParsedArgument>) as well
-// as fn parse_arguments()
+//to be created in impl Argument.check_args(&self, args: &Vec<ParsedArgument>) as well
+// as parse_arguments()
 struct Argument {
     //POSIX syntax utilizes a single dash or hyphen - utilizing a single alphanumeric.
     //Do not enter the dash "-" before the argument.
