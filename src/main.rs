@@ -113,7 +113,7 @@ impl MachineAddress {
         //Print the octets that have been generated
         &self.print_octets();
 
-        //We only need to print the assignable range is we didn't print a unique address
+        //We only need to print the assignable range if we didn't print a unique address
         if self.mac.len() < 6 {
             println!();
             //There are 256 addresses per octet, take 256 to the power of octets not randomly generated
@@ -258,9 +258,11 @@ impl <T: PartialEq> ArgumentWithValue<T> {
         //If what the user inputted is in the accepted values, get the index and return
         //the value from return_values
         let output = if self.accepted_values.contains(&args[parse_result.parse_index].value) {
-                let return_index = self.accepted_values.iter().position(|value| value == &args[parse_result.parse_index].value).unwrap();
+                let return_index = self.accepted_values.iter()
+                    .position(|value| value == &args[parse_result.parse_index].value).unwrap();
                 &self.return_values[return_index]
-            //Otherwise return default value.  If the user entered a wrong value display warning if the argument was passed.
+            //Otherwise return default value.  If the user entered a wrong value display 
+            //warning if the argument was passed.
             } else {
                 if parse_result.is_used {
                     println!();
