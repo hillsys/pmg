@@ -19,7 +19,7 @@ use std::env;
 struct MachineAddress {
     //The MAC address or prefix that will be printed
     mac: Vec<String>,
-    //Determines is a help message should print when no args are passed.
+    //Determines if a help message should print when no args are passed.
     arg_count: usize,
     //Determines the use of capitalization for hexadecimal output
     case: bool,
