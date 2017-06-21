@@ -11,7 +11,7 @@
 POSIX | GNU | NOTES
 ----- | --- | ----
 -h | --help | Displays help message.
-_ | _ | Overrides:  All	
+- | - | Overrides:  All	
 -u | --unique | Generates a single MAC address.  
  | | Overrides: -r/--range.
 -n | --noSeparator | Generates a MAC address or prefix without a separator.
