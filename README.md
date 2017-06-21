@@ -1,13 +1,13 @@
 # pmg
 ## Private MAC Generator.  Randomly create locally administered MAC addresses.
 
-## SYNTAX POSIX
-*pmg [-h] [-u] [-n] [[-r] <integer>] [[-s] <string>] [[-c] <string>]
+### SYNTAX POSIX
+* pmg [-h] [-u] [-n] [[-r] <integer>] [[-s] <string>] [[-c] <string>]
 
-## SYNTAX GNU
-*pmg [--help] [--unique] [[--range] <integer>] [[--separator] <string>] [[--case] <string>]
+### SYNTAX GNU
+* pmg [--help] [--unique] [[--range] <integer>] [[--separator] <string>] [[--case] <string>]
 	
-## USAGE
+### USAGE
 POSIX | GNU | NOTES
 ----- | --- | ----
 -h | --help | Displays help message.
@@ -21,9 +21,9 @@ POSIX | GNU | NOTES
  | | Defaults: 1
  | | Notes:  Refers to how many octets to use to generate your
  | | private MAC prefix.
- | | *1 (1 octet)  =      255 assignable addresses
- | | *2 (2 octets) =    65536 assignable addresses
- | | *3 (3 octets) = 16777216 assignable addresses							
+ | | * 1 (1 octet)  =      255 assignable addresses
+ | | * 2 (2 octets) =    65536 assignable addresses
+ | | * 3 (3 octets) = 16777216 assignable addresses							
 -s | --separator | The separator used for the MAC address.
  | | Accepted Values:  : - .
  | | Defaults:  :		
@@ -31,17 +31,17 @@ POSIX | GNU | NOTES
  | | Accepted Values:  l u lower upper
  | | Defaults:  l
 
-## EXAMPLES
-*pmg -u                  Provides a single MAC address: xxxxxxxxxxxx
-*pmg -r 2 -c u -s :      Provides a MAC prefix of:  XX:XX:XX:XX
-*pmg -s -                Provides a MAC prefix of:  xx-xx-xx-xx-xx
+### EXAMPLES
+* pmg -u                  Provides a single MAC address: xxxxxxxxxxxx
+* pmg -r 2 -c u -s :      Provides a MAC prefix of:  XX:XX:XX:XX
+* pmg -s -                Provides a MAC prefix of:  xx-xx-xx-xx-xx
 											
-## REMARKS
-    ###Providing incorrect values for arguments will result in use of default value for that argument.
-    ###Example:  pmg -r 5 [Result will use default for -r which is 1]	
+### REMARKS
+* Providing incorrect values for arguments will result in use of default value for that argument.
+* Example:  pmg -r 5 [Result will use default for -r which is 1]	
 	
-## CONTACT INFORMATION
-    Paul Hill
-    paulghill@msn.com
+### CONTACT INFORMATION
+* Paul Hill
+* paulghill@msn.com
 	
 ### Copyright 2017
