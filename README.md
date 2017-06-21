@@ -14,7 +14,7 @@ USAGE
 	
     -u      --unique        Generates a single MAC address.  
                             Overrides: -r/--range.
-    in      --noSeparator   Generates a MAC address or prefix without a separator.
+    -n      --noSeparator   Generates a MAC address or prefix without a separator.
                             Overrides: -s/--separator
 						
     -r      --range         Generates a MAC prefix for a range of private addresses.
