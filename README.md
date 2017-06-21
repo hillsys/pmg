@@ -1,15 +1,15 @@
 # pmg
-##Private MAC Generator.  Randomly create locally administered MAC addresses.
+## Private MAC Generator.  Randomly create locally administered MAC addresses.
 
-##SYNTAX POSIX
+## SYNTAX POSIX
 *pmg [-h] [-u] [-n] [[-r] <integer>] [[-s] <string>] [[-c] <string>]
 
-##SYNTAX GNU
+## SYNTAX GNU
 *pmg [--help] [--unique] [[--range] <integer>] [[--separator] <string>] [[--case] <string>]
 	
-##USAGE
+## USAGE
 POSIX | GNU | NOTES
-_____ | ___ | _____
+----- | --- | ----
 -h | --help | Displays help message.
  | | Overrides:  All	
 -u | --unique | Generates a single MAC address.  
@@ -31,17 +31,17 @@ _____ | ___ | _____
  | | Accepted Values:  l u lower upper
  | | Defaults:  l
 
-##EXAMPLES
+## EXAMPLES
 *pmg -u                  Provides a single MAC address: xxxxxxxxxxxx
 *pmg -r 2 -c u -s :      Provides a MAC prefix of:  XX:XX:XX:XX
 *pmg -s -                Provides a MAC prefix of:  xx-xx-xx-xx-xx
 											
-##REMARKS
+## REMARKS
     ###Providing incorrect values for arguments will result in use of default value for that argument.
     ###Example:  pmg -r 5 [Result will use default for -r which is 1]	
 	
-##CONTACT INFORMATION
+## CONTACT INFORMATION
     Paul Hill
     paulghill@msn.com
 	
-###Copyright 2017
+### Copyright 2017
