@@ -8,28 +8,22 @@
     pmg [--help] [--unique] [[--range] <integer>] [[--separator] <string>] [[--case] <string>]
 	
 ### USAGE
-POSIX | GNU | NOTES
------ | --- | ----
--h | --help | Displays help message.
---- | --- | Overrides:  All	
--u | --unique | Generates a single MAC address.  
- | | Overrides: -r/--range.
--n | --noSeparator | Generates a MAC address or prefix without a separator.
- | - | Overrides: -s/--separator					
--r | --range | Generates a MAC prefix for a range of private addresses.
- | - | Accepted Values:  1 2 3
- | - | Defaults: 1
- | - | Notes:  Refers to how many octets to use to generate your
- | - | private MAC prefix.
- | - | 1 (1 octet)  =      255 assignable addresses
- | - | 2 (2 octets) =    65536 assignable addresses
- | - | 3 (3 octets) = 16777216 assignable addresses							
--s | --separator | The separator used for the MAC address.
- | - | Accepted Values:  : - .
- | - | Defaults:  :		
--c | --case | The case the hexadecimal letters are shown in.
- | - | Accepted Values:  l u lower upper
- | - | Defaults:  l
+POSIX | GNU | NOTES | Overrides | Accepted Values | Default
+----- | --- | ----- | --------- | --------------- | -------
+-h | --help | Displays help message. | All	| None | None
+-u | --unique | Generates a single MAC address. | -r/--range. | None | None
+-n | --noSeparator | Generates a MAC address or prefix without a separator. | -s/--separator | None | None					
+-r | --range | Generates a MAC prefix for a range of private addresses. | None | 1, 2, 3 | 1						
+-s | --separator | The separator used for the MAC address. | None | :, -, . | :		
+-c | --case | The case the hexadecimal letters are shown in. | None | l, u, lower, upper | l, lower
+
+### Range Notes
+Range refers to how many octets to use to generate your private MAC prefix.
+octets | assignable addresses
+------ | --------------------
+1 | 255
+2 | 65536
+3 | 16777216	
 
 ### EXAMPLES
     pmg -u                  Provides a single MAC address: xxxxxxxxxxxx
