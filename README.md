@@ -18,8 +18,8 @@ POSIX | GNU | NOTES | Overrides | Accepted Values | Default
 -c | --case | The case the hexadecimal letters are shown in. | None | l, u, lower, upper | l, lower
 
 ### Range Notes
-Range refers to how many octets to use to generate your private MAC prefix.
-octets | assignable addresses
+    Range refers to how many octets to use to generate your private MAC prefix.
+Octets | Assignable Addresses
 ------ | --------------------
 1 | 255
 2 | 65536
