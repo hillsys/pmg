@@ -36,6 +36,6 @@ Octets | Assignable Addresses
 	
 ### CONTACT INFORMATION
     Paul Hill
-    paulghill@msn.com
+    paul@hillsys.org
 	
 ### Copyright 2017
