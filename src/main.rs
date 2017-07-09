@@ -128,6 +128,7 @@ impl MachineAddress {
             self.print_assignable_octets(true);
             print!(" - ");
             self.print_assignable_octets(false);
+            println!();
         }
     }
 }
