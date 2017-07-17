@@ -364,6 +364,8 @@ fn main() {
                 default_value: ':'
             }.get_return_value(&parsed_args).to_string()
         }.print();
+
+        println!();
     }
 }
 
